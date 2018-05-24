@@ -1,0 +1,16 @@
+body {
+  border: 0;
+}
+.here {
+  outline: 1px dashed red;
+}
+.here1 {
+  outline: 1px dashed blue;
+}
+.here2 {
+  outline: 1px dashed magenta;
+}
+
+.card {
+  max-width: 320px;
+}
