@@ -7,6 +7,7 @@ import { connect } from "react-redux";
 import { updateList } from "./actions";
 import CarPage from "./components/CarPage";
 import { config } from "./firebaseConfig";
+import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 
 firebase.initializeApp(config);
 
@@ -44,10 +45,14 @@ class ConnectedApp extends Component {
         <Navbar />
         <Container fluid>
           <Row>
-            <Col xs="12" className="d-flex flex-row flex-wrap">
-              <CarList />
-              {/* <CarPage/> */}
-            </Col>
+            <Router>
+              <Col xs="12" className="d-flex flex-row flex-wrap">
+                <Switch>
+                  <Route exact path="/" component={CarList} />
+                  <Route path="/*" component={CarPage} />
+                </Switch>
+              </Col>
+            </Router>
           </Row>
         </Container>
       </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import CarPage from "./CarPage";
 import {
   Card,
   CardBody,
@@ -7,6 +8,7 @@ import {
   CardText,
   CardImg
 } from "reactstrap";
+import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 
 const CarCard = props => {
   const { car } = props;
@@ -17,9 +19,11 @@ const CarCard = props => {
       <CardImg top width="100%" src={preview} alt="Car image" />
       <CardBody>
         <CardTitle>
-          {`${car.brand ? car.brand : "Unknown brand"}, ${
-            car.country ? car.country : "Unknown place"
-          }`}
+          <Link to={`/${car.id}`}>
+            {`${car.brand ? car.brand : "Unknown brand"}, ${
+              car.country ? car.country : "Unknown place"
+            }`}
+          </Link>
         </CardTitle>
         <CardText>
           <small className="text-muted">
