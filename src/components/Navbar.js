@@ -12,6 +12,7 @@ import {
   DropdownMenu,
   DropdownItem
 } from "reactstrap";
+import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 
 export default class AppNavbar extends React.Component {
   constructor(props) {
@@ -31,7 +32,9 @@ export default class AppNavbar extends React.Component {
     return (
       <div>
         <Navbar color="dark" dark expand="md">
-          <NavbarBrand href="javascript:void(0)">reactstrap</NavbarBrand>
+          <Link to="./" className="text-white navbar-brand">
+            A.C.T.
+          </Link>
           <NavbarToggler onClick={this.toggle} />
           <Collapse isOpen={this.state.isOpen} navbar>
             <Nav className="ml-auto" navbar>
@@ -39,9 +42,7 @@ export default class AppNavbar extends React.Component {
                 <NavLink href="javascript:void(0)">Link1</NavLink>
               </NavItem>
               <NavItem>
-                <NavLink href="javascript:void(0)">
-                Link2
-                </NavLink>
+                <NavLink href="javascript:void(0)">Link2</NavLink>
               </NavItem>
               <UncontrolledDropdown nav inNavbar>
                 <DropdownToggle nav caret>

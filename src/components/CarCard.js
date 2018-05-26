@@ -1,14 +1,7 @@
 import React from "react";
 import CarPage from "./CarPage";
-import {
-  Card,
-  CardBody,
-  Button,
-  CardTitle,
-  CardText,
-  CardImg
-} from "reactstrap";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import { Card, CardBody, CardTitle, CardText, CardImg } from "reactstrap";
+import { Link } from "react-router-dom";
 
 const CarCard = props => {
   const { car } = props;

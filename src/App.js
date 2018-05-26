@@ -7,7 +7,7 @@ import { connect } from "react-redux";
 import { updateList } from "./actions";
 import CarPage from "./components/CarPage";
 import { config } from "./firebaseConfig";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 firebase.initializeApp(config);
 
@@ -18,9 +18,6 @@ const mapDispatchToProps = dispatch => {
 };
 
 class ConnectedApp extends Component {
-  constructor() {
-    super();
-  }
 
   componentDidMount() {
     const rootRef = firebase
@@ -41,21 +38,21 @@ class ConnectedApp extends Component {
 
   render() {
     return (
-      <div className="">
-        <Navbar />
-        <Container fluid>
-          <Row>
-            <Router>
+      <Router>
+        <div className="">
+          <Navbar />
+          <Container fluid>
+            <Row>
               <Col xs="12" className="d-flex flex-row flex-wrap">
                 <Switch>
                   <Route exact path="/" component={CarList} />
                   <Route path="/*" component={CarPage} />
                 </Switch>
               </Col>
-            </Router>
-          </Row>
-        </Container>
-      </div>
+            </Row>
+          </Container>
+        </div>
+      </Router>
     );
   }
 }
