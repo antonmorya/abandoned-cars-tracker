@@ -42,7 +42,7 @@ class ConnectedApp extends Component {
         <div className="">
           <Navbar />
           <Container fluid>
-            <Row>
+            <Row className='pt-2'>
               <Col xs="12" className="d-flex flex-row flex-wrap">
                 <Switch>
                   <Route exact path="/" component={CarList} />

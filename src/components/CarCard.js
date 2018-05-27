@@ -1,5 +1,4 @@
 import React from "react";
-import CarPage from "./CarPage";
 import { Card, CardBody, CardTitle, CardText, CardImg } from "reactstrap";
 import { Link } from "react-router-dom";
 

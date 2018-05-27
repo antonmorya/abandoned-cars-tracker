@@ -1,21 +1,27 @@
 body {
-  border: 0;
+    border: 0;
 }
+
 .here {
-  outline: 1px dashed red;
+    outline: 1px dashed red;
 }
+
 .here1 {
-  outline: 1px dashed blue;
+    outline: 1px dashed blue;
 }
+
 .here2 {
-  outline: 1px dashed magenta;
+    outline: 1px dashed magenta;
 }
 
 .card {
-  max-width: 320px;
-  margin-top: 0.5rem;
+    max-width: 320px;
 }
 
 .card:not(:last-child) {
-  margin-right: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.fw-500 {
+    font-weight: 500;
 }

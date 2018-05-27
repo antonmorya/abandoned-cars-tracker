@@ -68,6 +68,7 @@ class SlideCarousel extends Component {
         activeIndex={activeIndex}
         next={this.next}
         previous={this.previous}
+        interval={10000}
       >
         <CarouselIndicators
           items={this.props.items}
