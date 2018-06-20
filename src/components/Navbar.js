@@ -32,18 +32,20 @@ export default class AppNavbar extends React.Component {
     return (
       <div>
         <Navbar color="dark" dark expand="md">
-          <Link to="./" className="text-white navbar-brand">
+          <Link to="/" className="text-white navbar-brand">
             A.C.T.
           </Link>
           <NavbarToggler onClick={this.toggle} />
           <Collapse isOpen={this.state.isOpen} navbar>
             <Nav className="ml-auto" navbar>
               <NavItem>
-                <NavLink href="javascript:void(0)">Link1</NavLink>
+                <Link to="/add" className="nav-link">
+                  Add a car
+                </Link>
               </NavItem>
-              <NavItem>
+              {/* <NavItem>
                 <NavLink href="javascript:void(0)">Link2</NavLink>
-              </NavItem>
+              </NavItem> */}
               <UncontrolledDropdown nav inNavbar>
                 <DropdownToggle nav caret>
                   Options

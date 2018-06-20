@@ -11,7 +11,7 @@ const CarCard = props => {
       <CardImg top width="100%" src={preview} alt="Car image" />
       <CardBody>
         <CardTitle>
-          <Link to={`/${car.id}`}>
+          <Link to={`/car/${car.id}`}>
             {`${car.brand ? car.brand : "Unknown brand"}, ${
               car.country ? car.country : "Unknown place"
             }`}

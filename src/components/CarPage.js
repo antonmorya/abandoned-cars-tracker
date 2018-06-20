@@ -10,7 +10,7 @@ const mapStateToProps = (state, ownProps) => {
 const getCar = (list, car) => list.filter(item => item.id === car)[0];
 
 const ConnectedLayout = ({ loaded, cars, ownProps }) => {
-  const data = loaded ? getCar(cars, ownProps.location.slice(1)) : null;
+  const data = loaded ? getCar(cars, ownProps.location.slice(5)) : null;
 
   return (
     <Row className="justify-content-center">

@@ -1,15 +1,13 @@
 import React, { Component } from "react";
 import Navbar from "./components/Navbar";
+import firebase from './firebaseInit';
 import { Container, Row, Col } from "reactstrap";
 import CarList from "./components/CarList";
-import firebase from "firebase";
 import { connect } from "react-redux";
 import { updateList } from "./actions";
 import CarPage from "./components/CarPage";
-import { config } from "./firebaseConfig";
+import UploaderPage from "./components/Uploader";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-
-firebase.initializeApp(config);
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -18,7 +16,6 @@ const mapDispatchToProps = dispatch => {
 };
 
 class ConnectedApp extends Component {
-
   componentDidMount() {
     const rootRef = firebase
       .database()
@@ -29,10 +26,10 @@ class ConnectedApp extends Component {
 
     rootRef.on(
       "value",
-      function(snapshot) {
+      function (snapshot) {
         updateCars(snapshot.val());
       },
-      function(errorObject) {}
+      function (errorObject) { }
     );
   }
 
@@ -42,14 +39,11 @@ class ConnectedApp extends Component {
         <div className="">
           <Navbar />
           <Container fluid>
-            <Row className='pt-2'>
-              <Col xs="12" className="d-flex flex-row flex-wrap">
-                <Switch>
-                  <Route exact path="/" component={CarList} />
-                  <Route path="/*" component={CarPage} />
-                </Switch>
-              </Col>
-            </Row>
+            <Switch>
+              <Route exact path="/" component={CarList} />
+              <Route path="/car/*" component={CarPage} />
+              <Route path="/add" component={UploaderPage} />
+            </Switch>
           </Container>
         </div>
       </Router>

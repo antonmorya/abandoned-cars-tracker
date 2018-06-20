@@ -71,7 +71,7 @@ class SlideCarousel extends Component {
         interval={10000}
       >
         <CarouselIndicators
-          items={this.props.items}
+          items={slides}
           activeIndex={activeIndex}
           onClickHandler={this.goToIndex}
         />
