@@ -1,113 +1,12 @@
 import React, { Component } from "react";
 import firebase from "../../firebaseInit";
 import ImageCompressor from "image-compressor.js";
-import { Media, Row, Col, Container, Label, Button } from "reactstrap";
+import { Button } from "reactstrap";
+import { buttonColor, isDisabled, ConvertDMSToDD } from "../../helpers";
+import ImgPreview from "./ImgPreview";
 
 var storage = firebase.storage();
 var storageRef = storage.ref("images/");
-
-function buttonColor(...args) {
-  console.log("args: ", args);
-  return args.every(item => !!item) ? "success" : "danger";
-}
-
-const DescriptionLabelRow = props => {
-  const { headerLabel, bodyLabel, rowClasses, colClasses } = props;
-
-  return (
-    <Row className={rowClasses}>
-      <Col className={colClasses}>
-        <Label className="font-weight-bold">{headerLabel}</Label>
-        <Label className="ml-3">{bodyLabel}</Label>
-      </Col>
-    </Row>
-  );
-};
-
-function ConvertDMSToDD(degrees, minutes, seconds, direction) {
-  let dd = degrees + minutes / 60 + seconds / (60 * 60);
-
-  if (direction === "S" || direction === "W") {
-    dd = dd * -1;
-  }
-  return dd;
-}
-
-const imgPreview = (filesList, compressedList, aboutList, removeItem) => {
-  let nodeList = [];
-  const count = filesList.length;
-
-  for (let i = 0; i < count; i++) {
-    /* console.log("aboutList: ", aboutList);
-    console.log(
-      "compressedList.length: ",
-      compressedList ? compressedList.length : null
-    ); */
-
-    nodeList.push(
-      filesList[i] ? (
-        <Media key={filesList[i].name} className="mb-4 flex-column flex-md-row">
-          <Media left>
-            <Media
-              object
-              alt=""
-              data-src={
-                compressedList && compressedList[i]
-                  ? URL.createObjectURL(compressedList[i])
-                  : ""
-              }
-              src={
-                compressedList && compressedList[i]
-                  ? URL.createObjectURL(compressedList[i])
-                  : ""
-              }
-            />
-          </Media>
-          <Media body>
-            <Media heading className="px-0 px-md-3">
-              {compressedList && compressedList[i] ? (
-                <Button size="sm" color="danger" onClick={() => removeItem(i)}>
-                  remove
-                </Button>
-              ) : (
-                "Generating preview"
-              )}
-            </Media>
-            <Container fluid>
-              {aboutList &&
-              aboutList[i] &&
-              compressedList &&
-              compressedList[i] ? (
-                <React.Fragment>
-                  <DescriptionLabelRow
-                    colClasses="px-0 px-md-3"
-                    rowClasses=""
-                    headerLabel="Local time:"
-                    bodyLabel={aboutList[i].DateTimeOriginal}
-                  />
-                  <DescriptionLabelRow
-                    colClasses="px-0 px-md-3"
-                    rowClasses=""
-                    headerLabel="Camera:"
-                    bodyLabel={aboutList[i].Model}
-                  />
-                  <DescriptionLabelRow
-                    colClasses="px-0 px-md-3"
-                    rowClasses=""
-                    headerLabel="Made:"
-                    bodyLabel={`${aboutList[i].gLat} x ${aboutList[i].gLon}`}
-                  />
-                </React.Fragment>
-              ) : null}
-            </Container>
-          </Media>
-        </Media>
-      ) : null
-    );
-  }
-
-  return nodeList;
-};
 
 class UploaderPage extends Component {
   constructor() {
@@ -122,7 +21,6 @@ class UploaderPage extends Component {
     this.uploadHandler = this.uploadHandler.bind(this);
     this.imgCompressor = this.imgCompressor.bind(this);
     this.imgInfoFiller = this.imgInfoFiller.bind(this);
-    this.imgCompressor = this.imgCompressor.bind(this);
     this.clearState = this.clearState.bind(this);
     this.removeItem = this.removeItem.bind(this);
   }
@@ -157,10 +55,7 @@ class UploaderPage extends Component {
 
   uploadHandler = () => {
     var imageRef = storageRef.child(this.state.selectedFiles.name);
-    console.log("uploadHandler", this.state.selectedFiles.name);
     imageRef.put(this.state.selectedFiles).then(function(snapshot) {
-      console.log("Uploaded a blob or file!");
-      console.log("imageRef: ", imageRef);
     });
   };
 
@@ -211,6 +106,7 @@ class UploaderPage extends Component {
 
     const options = {
       quality: 0.8,
+      minWidth: 267,
       maxHeight: 210
     };
 
@@ -271,20 +167,33 @@ class UploaderPage extends Component {
                   this.state.selectedFiles.length ===
                     this.state.aboutFIles.length
               )}
+              disabled={isDisabled(
+                this.state.selectedFiles,
+                this.state.compressedFiles,
+                this.state.aboutFIles,
+                this.state.selectedFiles &&
+                  this.state.compressedFiles &&
+                  this.state.aboutFIles &&
+                  this.state.selectedFiles.length > 0 &&
+                  this.state.selectedFiles.length ===
+                    this.state.compressedFiles.length &&
+                  this.state.selectedFiles.length ===
+                    this.state.aboutFIles.length
+              )}
             >
               Upload!
             </Button>
           </div>
         </div>
 
-        {this.state.selectedFiles
-          ? imgPreview(
-              this.state.selectedFiles,
-              this.state.compressedFiles,
-              this.state.aboutFIles,
-              this.removeItem
-            )
-          : null}
+        {this.state.selectedFiles ? (
+          <ImgPreview
+            filesList={this.state.selectedFiles}
+            compressedList={this.state.compressedFiles}
+            aboutList={this.state.aboutFIles}
+            removeItem={this.removeItem}
+          />
+        ) : null}
       </React.Fragment>
     );
   }
