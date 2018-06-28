@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import CarCard from "./CarCard";
-import { Container, Row, Col } from "reactstrap";
+import { Row, Col } from "reactstrap";
 
 const mapStateToProps = state => {
   return { cars: state.cars };

@@ -1,9 +1,16 @@
 import React, { Component } from "react";
 import firebase from "../../firebaseInit";
 import ImageCompressor from "image-compressor.js";
-import { Button } from "reactstrap";
-import { buttonColor, isDisabled, ConvertDMSToDD } from "../../helpers";
+import { Button, FormGroup, Label, Input, FormFeedback, FormText } from "reactstrap";
+import {
+  buttonColor,
+  isDisabled,
+  ConvertDMSToDD,
+  getGeoData,
+  isValid
+} from "../../helpers";
 import ImgPreview from "./ImgPreview";
+import Geocode from "../../helpers/geocode";
 
 var storage = firebase.storage();
 var storageRef = storage.ref("images/");
@@ -16,6 +23,8 @@ class UploaderPage extends Component {
       compressedFiles: null,
       aboutFIles: null
     };
+
+    this.modelInput = React.createRef();
 
     this.fileChangedHandler = this.fileChangedHandler.bind(this);
     this.uploadHandler = this.uploadHandler.bind(this);
@@ -55,8 +64,7 @@ class UploaderPage extends Component {
 
   uploadHandler = () => {
     var imageRef = storageRef.child(this.state.selectedFiles.name);
-    imageRef.put(this.state.selectedFiles).then(function(snapshot) {
-    });
+    imageRef.put(this.state.selectedFiles).then(function(snapshot) {});
   };
 
   imgInfoFiller = fileList => {
@@ -90,6 +98,20 @@ class UploaderPage extends Component {
           lonDirection
         );
 
+        Geocode.fromLatLng(gLat, gLon).then(
+          response => {
+            const address = response.results[0].formatted_address;
+
+            aboutFIles[i].formattedAddress = address;
+            aboutFIles[i].country = getGeoData(response, "country");
+          },
+          error => {
+            // TODO: replace with Alert Component
+            // TODO: handle an error - what file cause error then clear state
+            console.error(error);
+          }
+        );
+
         aboutFIles[i].gLon = gLon;
         aboutFIles[i].gLat = gLat;
       });
@@ -106,7 +128,6 @@ class UploaderPage extends Component {
 
     const options = {
       quality: 0.8,
-      minWidth: 267,
       maxHeight: 210
     };
 
@@ -120,7 +141,9 @@ class UploaderPage extends Component {
           });
         })
         .catch(err => {
-          console.log("ERROR: ", err);
+          // TODO: replace with Alert Component
+          // TODO: handle an error - what file cause error then clear state
+          console.error("ERROR: ", err);
         })
     );
   };
@@ -136,6 +159,22 @@ class UploaderPage extends Component {
   render() {
     return (
       <React.Fragment>
+        <FormGroup>
+          <Label for="model_name">Model name</Label>
+          <Input id="model_name" type="text" id="title" placeholder="" invalid = {isValid()}/>
+          <FormFeedback valid>That's it!</FormFeedback>
+          <FormFeedback invalid>Must input model name at least</FormFeedback>
+          <FormText>BMW, Porsche, Lada</FormText>
+        </FormGroup>
+        <FormGroup>
+        <Label for="model">Model</Label>
+          <Input id="model" type="text" id="title" placeholder="" />
+          <FormText>E230, 911, T-1000</FormText>
+        </FormGroup>
+        <FormGroup>
+          <Label for="notes">Notes</Label>
+          <Input type="textarea" name="text" id="notes" />
+        </FormGroup>
         <div className="input-group my-3">
           <div className="custom-file">
             <input

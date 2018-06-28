@@ -58,8 +58,14 @@ const ImgPreview = props => {
                   <DescriptionLabelRow
                     colClasses="px-0 px-md-3"
                     rowClasses=""
-                    headerLabel="Made:"
-                    bodyLabel={`${aboutList[i].gLat} x ${aboutList[i].gLon}`}
+                    headerLabel="Location:"
+                    bodyLabel={`${aboutList[i].country}`}
+                  />
+                  <DescriptionLabelRow
+                    colClasses="px-0 px-md-3"
+                    rowClasses=""
+                    headerLabel="Full address:"
+                    bodyLabel={`${aboutList[i].formattedAddress}`}
                   />
                 </React.Fragment>
               ) : null}
