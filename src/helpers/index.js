@@ -54,4 +54,6 @@ export function getGeoData(apiResults, searchFor) {
   return result;
 }
 
-export const isValid = () => true
+export function isInvalid(...args) {
+  return args.every(item => !!item) ? false : true;
+}

@@ -1,37 +1,55 @@
 import React, { Component } from "react";
 import firebase from "../../firebaseInit";
 import ImageCompressor from "image-compressor.js";
-import { Button, FormGroup, Label, Input, FormFeedback, FormText } from "reactstrap";
+import {
+  Button,
+  FormGroup,
+  Label,
+  Input,
+  FormFeedback,
+  FormText
+} from "reactstrap";
 import {
   buttonColor,
   isDisabled,
   ConvertDMSToDD,
   getGeoData,
-  isValid
+  isInvalid
 } from "../../helpers";
 import ImgPreview from "./ImgPreview";
 import Geocode from "../../helpers/geocode";
 
-var storage = firebase.storage();
-var storageRef = storage.ref("images/");
+let storage = firebase.storage();
+let storageRef = storage.ref("images/");
+let previewStorageRef = storage.ref("prevs/");
+let database = firebase.database();
 
 class UploaderPage extends Component {
   constructor() {
     super();
     this.state = {
+      brand: "",
+      model: "",
       selectedFiles: null,
       compressedFiles: null,
-      aboutFIles: null
+      aboutFIles: null,
+      imgURLs: [],
+      prevURLs: [],
+      imgUploaded: false,
+      prevUploaded: false
     };
 
     this.modelInput = React.createRef();
 
-    this.fileChangedHandler = this.fileChangedHandler.bind(this);
+    this.fileChangeHandler = this.fileChangeHandler.bind(this);
     this.uploadHandler = this.uploadHandler.bind(this);
     this.imgCompressor = this.imgCompressor.bind(this);
     this.imgInfoFiller = this.imgInfoFiller.bind(this);
     this.clearState = this.clearState.bind(this);
     this.removeItem = this.removeItem.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.stateSetter = this.stateSetter.bind(this);
+    this.isEverythingUploaded = this.isEverythingUploaded.bind(this);
   }
 
   removeItem = index => {
@@ -48,7 +66,7 @@ class UploaderPage extends Component {
     });
   };
 
-  fileChangedHandler = event => {
+  fileChangeHandler = event => {
     this.clearState();
 
     let filesArray = Object.values(event.target.files);
@@ -62,9 +80,149 @@ class UploaderPage extends Component {
     this.imgInfoFiller(filesArray);
   };
 
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === "checkbox" ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
+
   uploadHandler = () => {
-    var imageRef = storageRef.child(this.state.selectedFiles.name);
-    imageRef.put(this.state.selectedFiles).then(function(snapshot) {});
+    const self = this;
+    const stateSetter = this.stateSetter;
+    const files = this.state.selectedFiles;
+    const controlLength = self.state.selectedFiles.length;
+    let imgURLs = [];
+    let prevURLs = [];
+
+    files.forEach((file, i) => {
+      let imageUploadTask = storageRef.child(file.name).put(file);
+      let previewUploadTask = previewStorageRef
+        .child(`prev_${file.name}`)
+        .put(this.state.compressedFiles[i]);
+
+      imageUploadTask.on(
+        firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+        function(snapshot) {
+          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+          var progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED: // or 'paused'
+              console.log("Upload is paused");
+              break;
+            case firebase.storage.TaskState.RUNNING: // or 'running'
+              console.log("Upload is running");
+              break;
+          }
+        },
+        function(error) {
+          // A full list of error codes is available at
+          // https://firebase.google.com/docs/storage/web/handle-errors
+          switch (error.code) {
+            case "storage/unauthorized":
+              // User doesn't have permission to access the object
+              break;
+
+            case "storage/canceled":
+              // User canceled the upload
+              break;
+
+            case "storage/unknown":
+              // Unknown error occurred, inspect error.serverResponse
+              break;
+          }
+        },
+        function() {
+          // Upload completed successfully, now we can get the download URL
+          imageUploadTask.snapshot.ref
+            .getDownloadURL()
+            .then(function(downloadURL) {
+              // console.log("File available at", downloadURL);
+              imgURLs[i] = downloadURL;
+              stateSetter({ imgURLs: imgURLs });
+              if (controlLength === self.state.imgURLs.length) {
+                self.setState({ imgUploaded: true });
+                self.isEverythingUploaded();
+              }
+            });
+        }
+      );
+
+      previewUploadTask.on(
+        firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+        function(snapshot) {
+          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+          var progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED: // or 'paused'
+              console.log("Upload is paused");
+              break;
+            case firebase.storage.TaskState.RUNNING: // or 'running'
+              console.log("Upload is running");
+              break;
+          }
+        },
+        function(error) {
+          // A full list of error codes is available at
+          // https://firebase.google.com/docs/storage/web/handle-errors
+          switch (error.code) {
+            case "storage/unauthorized":
+              // User doesn't have permission to access the object
+              break;
+
+            case "storage/canceled":
+              // User canceled the upload
+              break;
+
+            case "storage/unknown":
+              // Unknown error occurred, inspect error.serverResponse
+              break;
+          }
+        },
+        function() {
+          // Upload completed successfully, now we can get the download URL
+          previewUploadTask.snapshot.ref
+            .getDownloadURL()
+            .then(function(downloadURL) {
+              prevURLs[i] = downloadURL;
+              stateSetter({ prevURLs: prevURLs });
+              if (controlLength === self.state.prevURLs.length) {
+                self.setState({ prevUploaded: true });
+                self.isEverythingUploaded();
+              }
+            });
+        }
+      );
+    });
+  };
+
+  databaseInfoSender = () => {
+    database()
+      .ref("/users")
+      .once("value")
+      .then(function(snapshot) {
+        console.log(snapshot.val());
+      });
+  };
+
+  stateSetter = value => {
+    this.setState({
+      ...value
+    });
+  };
+
+  isEverythingUploaded = () => {
+    if (!!this.state.imgUploaded && !!this.state.prevUploaded) {
+      console.log("Uploaded everything!!!");
+      this.clearState();
+    }
   };
 
   imgInfoFiller = fileList => {
@@ -152,7 +310,11 @@ class UploaderPage extends Component {
     this.setState({
       selectedFiles: null,
       compressedFiles: null,
-      aboutFIles: null
+      aboutFIles: null,
+      imgURLs: [],
+      prevURLs: [],
+      imgUploaded: false,
+      prevUploaded: false
     });
   };
 
@@ -160,15 +322,28 @@ class UploaderPage extends Component {
     return (
       <React.Fragment>
         <FormGroup>
-          <Label for="model_name">Model name</Label>
-          <Input id="model_name" type="text" id="title" placeholder="" invalid = {isValid()}/>
+          <Label for="brand">Brand</Label>
+          <Input
+            id="brand"
+            name="brand"
+            type="text"
+            id="title"
+            onChange={this.handleInputChange}
+          />
           <FormFeedback valid>That's it!</FormFeedback>
-          <FormFeedback invalid>Must input model name at least</FormFeedback>
+          <FormFeedback invalid>Must input brand name at least</FormFeedback>
           <FormText>BMW, Porsche, Lada</FormText>
         </FormGroup>
         <FormGroup>
-        <Label for="model">Model</Label>
-          <Input id="model" type="text" id="title" placeholder="" />
+          <Label for="model">Model</Label>
+          <Input
+            id="model"
+            name="model"
+            type="text"
+            id="title"
+            placeholder=""
+            onChange={this.handleInputChange}
+          />
           <FormText>E230, 911, T-1000</FormText>
         </FormGroup>
         <FormGroup>
@@ -179,7 +354,7 @@ class UploaderPage extends Component {
           <div className="custom-file">
             <input
               type="file"
-              onChange={this.fileChangedHandler}
+              onChange={this.fileChangeHandler}
               multiple
               className="custom-file-input"
               name="fileInput"
@@ -204,7 +379,8 @@ class UploaderPage extends Component {
                   this.state.selectedFiles.length ===
                     this.state.compressedFiles.length &&
                   this.state.selectedFiles.length ===
-                    this.state.aboutFIles.length
+                    this.state.aboutFIles.length,
+                this.state.brand
               )}
               disabled={isDisabled(
                 this.state.selectedFiles,
@@ -217,10 +393,11 @@ class UploaderPage extends Component {
                   this.state.selectedFiles.length ===
                     this.state.compressedFiles.length &&
                   this.state.selectedFiles.length ===
-                    this.state.aboutFIles.length
+                    this.state.aboutFIles.length,
+                this.state.brand
               )}
             >
-              Upload!
+              Add
             </Button>
           </div>
         </div>
