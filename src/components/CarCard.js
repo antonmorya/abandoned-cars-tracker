@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const CarCard = props => {
   const { car } = props;
-  const preview = car.prevs.split(", ")[0];
+  const preview = car.prevs.split(",")[0];
 
   return (
     <Card className="mb-4">

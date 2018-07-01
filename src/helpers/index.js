@@ -57,3 +57,10 @@ export function getGeoData(apiResults, searchFor) {
 export function isInvalid(...args) {
   return args.every(item => !!item) ? false : true;
 }
+
+export function isArrayValid(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    if (!arr[i]) return false;
+  }
+  return true;
+}

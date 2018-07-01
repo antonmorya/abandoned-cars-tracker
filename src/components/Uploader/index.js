@@ -14,7 +14,8 @@ import {
   isDisabled,
   ConvertDMSToDD,
   getGeoData,
-  isInvalid
+  isInvalid,
+  isArrayValid
 } from "../../helpers";
 import ImgPreview from "./ImgPreview";
 import Geocode from "../../helpers/geocode";
@@ -30,6 +31,7 @@ class UploaderPage extends Component {
     this.state = {
       brand: "",
       model: "",
+      notes: "",
       selectedFiles: null,
       compressedFiles: null,
       aboutFIles: null,
@@ -49,7 +51,8 @@ class UploaderPage extends Component {
     this.removeItem = this.removeItem.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.stateSetter = this.stateSetter.bind(this);
-    this.isEverythingUploaded = this.isEverythingUploaded.bind(this);
+    this.filesAreUploaded = this.filesAreUploaded.bind(this);
+    this.databaseSendInfo = this.databaseSendInfo.bind(this);
   }
 
   removeItem = index => {
@@ -110,13 +113,13 @@ class UploaderPage extends Component {
           // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
           var progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload is " + progress + "% done");
+          // console.log("Upload is " + progress + "% done");
           switch (snapshot.state) {
             case firebase.storage.TaskState.PAUSED: // or 'paused'
-              console.log("Upload is paused");
+              // console.log("Upload is paused");
               break;
             case firebase.storage.TaskState.RUNNING: // or 'running'
-              console.log("Upload is running");
+              // console.log("Upload is running");
               break;
           }
         },
@@ -142,12 +145,12 @@ class UploaderPage extends Component {
           imageUploadTask.snapshot.ref
             .getDownloadURL()
             .then(function(downloadURL) {
-              // console.log("File available at", downloadURL);
+              console.log("File available at", downloadURL);
               imgURLs[i] = downloadURL;
               stateSetter({ imgURLs: imgURLs });
               if (controlLength === self.state.imgURLs.length) {
                 self.setState({ imgUploaded: true });
-                self.isEverythingUploaded();
+                self.filesAreUploaded();
               }
             });
         }
@@ -159,13 +162,13 @@ class UploaderPage extends Component {
           // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
           var progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload is " + progress + "% done");
+          // console.log("Upload is " + progress + "% done");
           switch (snapshot.state) {
             case firebase.storage.TaskState.PAUSED: // or 'paused'
-              console.log("Upload is paused");
+              // console.log("Upload is paused");
               break;
             case firebase.storage.TaskState.RUNNING: // or 'running'
-              console.log("Upload is running");
+              // console.log("Upload is running");
               break;
           }
         },
@@ -195,7 +198,7 @@ class UploaderPage extends Component {
               stateSetter({ prevURLs: prevURLs });
               if (controlLength === self.state.prevURLs.length) {
                 self.setState({ prevUploaded: true });
-                self.isEverythingUploaded();
+                self.filesAreUploaded();
               }
             });
         }
@@ -203,13 +206,27 @@ class UploaderPage extends Component {
     });
   };
 
-  databaseInfoSender = () => {
-    database()
-      .ref("/users")
-      .once("value")
-      .then(function(snapshot) {
-        console.log(snapshot.val());
-      });
+  databaseSendInfo = () => {
+    const data = {
+      brand: this.state.brand,
+      model: this.state.model,
+      notes: this.state.notes,
+      EXIFdata: this.state.aboutFIles,
+      images: this.state.imgURLs,
+      prevs: this.state.prevURLs,
+      heroImage: 0
+    };
+    // console.log("images:", this.state.imgURLs.toString());
+    // console.log("prevs:", this.state.prevURLs.toString());
+     database.ref("cars/").push({
+      brand: this.state.brand,
+      model: this.state.model,
+      notes: this.state.notes,
+      EXIFdata: this.state.aboutFIles,
+      images: this.state.imgURLs.toString(),
+      prevs: this.state.prevURLs.toString(),
+      heroImage: 0
+    }); 
   };
 
   stateSetter = value => {
@@ -218,10 +235,14 @@ class UploaderPage extends Component {
     });
   };
 
-  isEverythingUploaded = () => {
-    if (!!this.state.imgUploaded && !!this.state.prevUploaded) {
-      console.log("Uploaded everything!!!");
-      this.clearState();
+  filesAreUploaded = () => {
+    if (this.state.imgUploaded && this.state.prevUploaded && isArrayValid(this.state.imgURLs) && isArrayValid(this.state.prevURLs)) {
+// console.log('isArrayValid(this.state.imgURLs)', isArrayValid(this.state.imgURLs))
+      // console.log('isArrayValid(this.state.prevURLs)', isArrayValid(this.state.prevURLs))
+      // console.log("Uploaded everything!!!");
+      // console.log("sending info to database");
+      // this.clearState();
+      this.databaseSendInfo();
     }
   };
 
@@ -230,7 +251,14 @@ class UploaderPage extends Component {
 
     fileList.forEach((item, i) => {
       window.EXIF.getData(item, function() {
-        aboutFIles[i] = window.EXIF.getAllTags(this);
+        let EXIFdata = window.EXIF.getAllTags(this);
+        Object.keys(EXIFdata).forEach(key => {
+          if (key === "undefined" || key === "CustomRendered") {
+            delete EXIFdata[key];
+          }
+        });
+        // console.log("EXIFkeys: ", EXIFdata);
+        aboutFIles[i] = EXIFdata;
         const Data = this;
 
         const latDegree = Data.exifdata.GPSLatitude[0].numerator;
@@ -328,6 +356,7 @@ class UploaderPage extends Component {
             name="brand"
             type="text"
             id="title"
+            value={this.state.brand}
             onChange={this.handleInputChange}
           />
           <FormFeedback valid>That's it!</FormFeedback>
@@ -341,14 +370,20 @@ class UploaderPage extends Component {
             name="model"
             type="text"
             id="title"
-            placeholder=""
+            value={this.state.model}
             onChange={this.handleInputChange}
           />
           <FormText>E230, 911, T-1000</FormText>
         </FormGroup>
         <FormGroup>
           <Label for="notes">Notes</Label>
-          <Input type="textarea" name="text" id="notes" />
+          <Input
+            type="textarea"
+            name="notes"
+            id="notes"
+            value={this.state.notes}
+            onChange={this.handleInputChange}
+          />
         </FormGroup>
         <div className="input-group my-3">
           <div className="custom-file">
