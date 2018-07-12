@@ -8,14 +8,12 @@ import {
   Input,
   FormFeedback,
   FormText,
-  Alert
 } from "reactstrap";
 import {
   buttonColor,
   isDisabled,
   ConvertDMSToDD,
   getGeoData,
-  isInvalid,
   isArrayValid
 } from "../../helpers";
 import ImgPreview from "./ImgPreview";
@@ -362,7 +360,6 @@ class UploaderPage extends Component {
             id="brand"
             name="brand"
             type="text"
-            id="title"
             value={this.state.brand}
             onChange={this.handleInputChange}
           />
@@ -376,7 +373,6 @@ class UploaderPage extends Component {
             id="model"
             name="model"
             type="text"
-            id="title"
             value={this.state.model}
             onChange={this.handleInputChange}
           />

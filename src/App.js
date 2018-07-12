@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Navbar from "./components/Navbar";
 import firebase from './firebaseInit';
-import { Container, Row, Col } from "reactstrap";
+import { Container } from "reactstrap";
 import CarList from "./components/CarList";
 import { connect } from "react-redux";
 import { updateList } from "./actions";

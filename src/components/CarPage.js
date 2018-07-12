@@ -14,10 +14,10 @@ const ConnectedLayout = ({ loaded, cars, ownProps }) => {
 
   return (
     <Row className="justify-content-center">
-      <Col sm={10} md={9} lg={7} className="" hidden={loaded}>
+      <Col sm={10} md={9} lg={8} className="" hidden={loaded}>
         Loading...
       </Col>
-      <Col className="" sm={10} md={9} lg={7} hidden={!loaded}>
+      <Col className="" sm={10} md={9} lg={8} hidden={!loaded}>
         {data ? <CarFullInfo {...data} /> : <h1>No such car</h1>}
       </Col>
     </Row>
