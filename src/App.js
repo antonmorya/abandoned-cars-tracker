@@ -27,7 +27,7 @@ class ConnectedApp extends Component {
     rootRef.on(
       "value",
       function (snapshot) {
-        updateCars(snapshot.val());
+        updateCars(snapshot.exportVal());
       },
       function (errorObject) { }
     );

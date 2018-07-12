@@ -7,7 +7,8 @@ import {
   Label,
   Input,
   FormFeedback,
-  FormText
+  FormText,
+  Alert
 } from "reactstrap";
 import {
   buttonColor,
@@ -38,7 +39,8 @@ class UploaderPage extends Component {
       imgURLs: [],
       prevURLs: [],
       imgUploaded: false,
-      prevUploaded: false
+      prevUploaded: false,
+      heroImage: 0
     };
 
     this.modelInput = React.createRef();
@@ -53,6 +55,7 @@ class UploaderPage extends Component {
     this.stateSetter = this.stateSetter.bind(this);
     this.filesAreUploaded = this.filesAreUploaded.bind(this);
     this.databaseSendInfo = this.databaseSendInfo.bind(this);
+    this.setPrimary = this.setPrimary.bind(this);
   }
 
   removeItem = index => {
@@ -66,6 +69,12 @@ class UploaderPage extends Component {
       selectedFiles,
       compressedFiles,
       aboutFIles
+    });
+  };
+
+  setPrimary = index => {
+    this.setState({
+      heroImage: index
     });
   };
 
@@ -113,13 +122,13 @@ class UploaderPage extends Component {
           // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
           var progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          // console.log("Upload is " + progress + "% done");
+          // "Upload is " + progress + "% done";
           switch (snapshot.state) {
             case firebase.storage.TaskState.PAUSED: // or 'paused'
-              // console.log("Upload is paused");
+              // "Upload is paused";
               break;
             case firebase.storage.TaskState.RUNNING: // or 'running'
-              // console.log("Upload is running");
+              // "Upload is running";
               break;
           }
         },
@@ -145,7 +154,6 @@ class UploaderPage extends Component {
           imageUploadTask.snapshot.ref
             .getDownloadURL()
             .then(function(downloadURL) {
-              console.log("File available at", downloadURL);
               imgURLs[i] = downloadURL;
               stateSetter({ imgURLs: imgURLs });
               if (controlLength === self.state.imgURLs.length) {
@@ -162,13 +170,13 @@ class UploaderPage extends Component {
           // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
           var progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          // console.log("Upload is " + progress + "% done");
+          // "Upload is " + progress + "% done";
           switch (snapshot.state) {
             case firebase.storage.TaskState.PAUSED: // or 'paused'
-              // console.log("Upload is paused");
+              // "Upload is paused";
               break;
             case firebase.storage.TaskState.RUNNING: // or 'running'
-              // console.log("Upload is running");
+              // "Upload is running";
               break;
           }
         },
@@ -207,26 +215,26 @@ class UploaderPage extends Component {
   };
 
   databaseSendInfo = () => {
-    const data = {
-      brand: this.state.brand,
-      model: this.state.model,
-      notes: this.state.notes,
-      EXIFdata: this.state.aboutFIles,
-      images: this.state.imgURLs,
-      prevs: this.state.prevURLs,
-      heroImage: 0
-    };
-    // console.log("images:", this.state.imgURLs.toString());
-    // console.log("prevs:", this.state.prevURLs.toString());
-     database.ref("cars/").push({
-      brand: this.state.brand,
-      model: this.state.model,
-      notes: this.state.notes,
-      EXIFdata: this.state.aboutFIles,
-      images: this.state.imgURLs.toString(),
-      prevs: this.state.prevURLs.toString(),
-      heroImage: 0
-    }); 
+    const self = this;
+
+    database.ref("cars/").push(
+      {
+        brand: this.state.brand,
+        model: this.state.model,
+        notes: this.state.notes,
+        EXIFdata: this.state.aboutFIles,
+        images: this.state.imgURLs.toString(),
+        prevs: this.state.prevURLs.toString(),
+        heroImage: this.state.heroImage
+      },
+      function(error) {
+        if (error) console.error("Error has occured during saving process");
+        else {
+          // "Data has been saved succesfully"
+          self.clearState();
+        }
+      }
+    );
   };
 
   stateSetter = value => {
@@ -236,12 +244,12 @@ class UploaderPage extends Component {
   };
 
   filesAreUploaded = () => {
-    if (this.state.imgUploaded && this.state.prevUploaded && isArrayValid(this.state.imgURLs) && isArrayValid(this.state.prevURLs)) {
-// console.log('isArrayValid(this.state.imgURLs)', isArrayValid(this.state.imgURLs))
-      // console.log('isArrayValid(this.state.prevURLs)', isArrayValid(this.state.prevURLs))
-      // console.log("Uploaded everything!!!");
-      // console.log("sending info to database");
-      // this.clearState();
+    if (
+      this.state.imgUploaded &&
+      this.state.prevUploaded &&
+      isArrayValid(this.state.imgURLs) &&
+      isArrayValid(this.state.prevURLs)
+    ) {
       this.databaseSendInfo();
     }
   };
@@ -257,7 +265,6 @@ class UploaderPage extends Component {
             delete EXIFdata[key];
           }
         });
-        // console.log("EXIFkeys: ", EXIFdata);
         aboutFIles[i] = EXIFdata;
         const Data = this;
 
@@ -443,6 +450,8 @@ class UploaderPage extends Component {
             compressedList={this.state.compressedFiles}
             aboutList={this.state.aboutFIles}
             removeItem={this.removeItem}
+            setPrimary={this.setPrimary}
+            primaryNumber={this.state.heroImage}
           />
         ) : null}
       </React.Fragment>

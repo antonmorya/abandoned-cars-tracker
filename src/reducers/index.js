@@ -9,7 +9,11 @@ const initialState = {
 const rootReducer = (state = initialState, action) => {
   switch (action.type) {
     case UPDATE_LIST:
-      const payloadArray = Object.values(action.payload);
+      // const payloadArray = Array.from(action.payload);
+      const payloadArray = [];
+      for (let key in action.payload) {
+        payloadArray.push({ id: key, ...action.payload[key] });
+      }
       return {
         ...state,
         cars: payloadArray,

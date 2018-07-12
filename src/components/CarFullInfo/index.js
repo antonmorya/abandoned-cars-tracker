@@ -8,7 +8,7 @@ const placeholder = [{
 }]
 
 const getSouces = data => {
-  const srcList = data.images.split(", ");
+  const srcList = data.images.split(",");
   return srcList.map(item => ({
     src: item,
     alt: `${data.brand}, ${data.country}`
@@ -23,6 +23,8 @@ const descriptionLabels = (key, value) => (
 );
 
 const CarFullInfo = props => {
+  const {heroImage} = props;
+
   return (
     <div>
       <Row className="mb-4">
@@ -31,8 +33,8 @@ const CarFullInfo = props => {
         </Col>
       </Row>
       {props.brand ? descriptionLabels("Brand", props.brand) : null}
-      {props.address ? descriptionLabels("Address", props.address) : null}
-      {props.timestamp ? descriptionLabels("Time", props.timestamp) : null}
+      {props.EXIFdata[heroImage].formattedAddress ? descriptionLabels("Address", props.EXIFdata[heroImage].formattedAddress) : null}
+      {props.EXIFdata[heroImage].DateTimeOriginal ? descriptionLabels("Time", props.EXIFdata[heroImage].DateTimeOriginal) : null}
     </div>
   );
 };

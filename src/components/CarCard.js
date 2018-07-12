@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 const CarCard = props => {
   const { car } = props;
+  const {heroImage} = car;
   const preview = car.prevs.split(",")[0];
 
   return (
@@ -13,13 +14,13 @@ const CarCard = props => {
         <CardTitle>
           <Link to={`/car/${car.id}`}>
             {`${car.brand ? car.brand : "Unknown brand"}, ${
-              car.country ? car.country : "Unknown place"
+              car.EXIFdata[heroImage].country ? car.EXIFdata[heroImage].country : "Unknown place"
             }`}
           </Link>
         </CardTitle>
         <CardText>
           <small className="text-muted">
-            {car.timestamp ? car.timestamp : "Main photo has no timestamp"}
+            {car.EXIFdata[heroImage].DateTimeOriginal ? car.EXIFdata[heroImage].DateTimeOriginal : "Main photo has no timestamp"}
           </small>
         </CardText>
       </CardBody>

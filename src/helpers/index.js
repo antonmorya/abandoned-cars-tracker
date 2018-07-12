@@ -64,3 +64,7 @@ export function isArrayValid(arr) {
   }
   return true;
 }
+
+export function primaryButtonColor(num, stateNum) {
+  return num == stateNum ? "success" : "info";
+}
