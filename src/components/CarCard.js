@@ -16,6 +16,9 @@ const styles = theme => ({
     flexDirection: "column",
     maxWidth: "calc(100% - 151px)"
   },
+  subheader: {
+    lineHeight: "1.2"
+  },
   content: {
     flex: "1 0 auto"
   },
@@ -28,10 +31,6 @@ const styles = theme => ({
     alignItems: "center",
     paddingLeft: theme.spacing.unit,
     paddingBottom: theme.spacing.unit
-  },
-  playIcon: {
-    height: 38,
-    width: 38
   }
 });
 
@@ -41,8 +40,8 @@ const CarCard = props => {
   const previewImg = car.prevs.split(",")[heroImage];
 
   return (
-    <div className="col-md-6 col-lg-3">
-      <Card className={`${classes.card}`}>
+    <div className="col-md-6 col-lg-4 col-xl-3 px-1">
+      <Card className={`${classes.card} mb-3`}>
         <div className={classes.details}>
           <CardContent className={classes.content}>
             <Typography
@@ -57,7 +56,11 @@ const CarCard = props => {
                 }`}
               </Link>
             </Typography>
-            <Typography variant="subheading" color="textSecondary">
+            <Typography
+              className={classes.subheader}
+              variant="subheading"
+              color="textSecondary"
+            >
               <small className="text-muted">
                 {car.EXIFdata[heroImage].DateTimeOriginal
                   ? car.EXIFdata[heroImage].DateTimeOriginal
@@ -65,7 +68,7 @@ const CarCard = props => {
               </small>
             </Typography>
           </CardContent>
-          <div className={classes.controls} />
+          {/* <div className={classes.controls} /> */}
         </div>
         <CardMedia className={classes.cover} image={previewImg} />
       </Card>
